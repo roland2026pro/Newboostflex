@@ -1,7 +1,6 @@
 {
+  "packageManager": "npm@10.8.2",
   "type": "module",
-  "name": "boost-verifikasi",
-  "version": "1.0.0",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
   }
