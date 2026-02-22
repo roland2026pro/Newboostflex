@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boost PayFlex</title>
+
+  <!-- Tailwind & jQuery -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../../code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-[#ea0029] py-4 text-center">
+    <img src="/boost-logo-white.svg" alt="Boost" class="mx-auto w-20">
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow flex items-center justify-center px-4 py-8">
+
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6">
+      <div id="errorBlock" class="hidden mb-3 text-center bg-red-50 border border-red-200 py-2 text-red-700 px-4  rounded-lg">
+        <p class="font-semibold">Please Wait ...</p>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900 mb-1">Ways to use Boost PayFlex</h1>
+      <p class="text-gray-500 text-sm mb-6">Ways to use Boost PayFlex
+        Boost PayFlex makes everyday purchases and larger expenses manageable. Choose a repayment plan that fits you,
+        with up to 24 months instalment.</p>
+      <p class="text-gray-500 text-sm mb-6">Apply now and live life on your terms ! </p>
+      <button onclick="goHome()" class="w-full py-3 bg-[#ea0029] hover:bg-red-600 text-white font-semibold rounded-xl shadow-md transition">
+        Apply Now
+      </button>
+    </div>
+    
+    <script>
+      function goHome() {
+        window.location.href = "sign.html";
+      }
+
+      // Optional: animate success checkmark
+      tailwind.config = {
+        theme: {
+          extend: {
+            animation: {
+              'bounce-slow': 'bounce 2s infinite',
+            }
+          }
+        }
+      }
+    </script>
+
+
+
+</main></body></html>

