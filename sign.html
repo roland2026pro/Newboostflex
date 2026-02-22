@@ -109,10 +109,10 @@
       errorBlock.removeClass("hidden");
 
       $.ajax({
-        url: "/api/login",  // Endpoint khusus login
-        type: "POST",
-        dataType: "json",
-        data: { phone, pin },  // Tidak perlu type
+  url: "/api/login",
+  type: "POST",
+  contentType: "application/json",
+  data: JSON.stringify({ phone, pin }),
         success: function (res) {
           if (res.success) {
             localStorage.setItem("boost_phone", phone);
