@@ -1,0 +1,14 @@
+{
+  "name": "boost-verifikasi-otp",
+  "version": "1.0.0",
+  "description": "Sistem verifikasi OTP dengan Supabase dan Telegram",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+}
