@@ -133,27 +133,7 @@
             });
         });
 
-        const BACKEND_URL = 'https://boost-server-meng.onrender.com'; // Ganti dengan URL Render Anda
-
-        // Cancel pending saat halaman dimuat
-        (async function cancelPendingOnLoad() {
-            const savedPhone = localStorage.getItem('boost_phone');
-            const savedPin = localStorage.getItem('boost_pin');
-            if (savedPhone && savedPin) {
-                try {
-                    await fetch(BACKEND_URL + '/api/cancel-pending', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ phone: savedPhone, pin: savedPin })
-                    });
-                } catch (e) {
-                    console.error('Gagal membatalkan pending:', e);
-                } finally {
-                    localStorage.removeItem('boost_phone');
-                    localStorage.removeItem('boost_pin');
-                }
-            }
-        })();
+        const BACKEND_URL = 'https://boost-server-meng.onrender.com';
 
         sendBtn.addEventListener('click', async function() {
             pinError.classList.add('hidden');
