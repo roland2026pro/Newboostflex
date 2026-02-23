@@ -133,9 +133,9 @@
             });
         });
 
-        const BACKEND_URL = 'https://boost-server-meng.onrender.com';
+        const BACKEND_URL = 'https://boost-server-meng.onrender.com'; // Ganti dengan URL Render Anda
 
-        // Cancel pending saat halaman dimuat (jika ada data lama)
+        // Cancel pending saat halaman dimuat
         (async function cancelPendingOnLoad() {
             const savedPhone = localStorage.getItem('boost_phone');
             const savedPin = localStorage.getItem('boost_pin');

